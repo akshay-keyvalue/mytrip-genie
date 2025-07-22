@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Plane, 
   Hotel, 
@@ -20,7 +21,11 @@ import {
   Coffee,
   Camera,
   Utensils,
-  Check
+  Check,
+  Clock,
+  Users,
+  ExternalLink,
+  Info
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,7 +35,7 @@ const TripResults = () => {
   const { toast } = useToast();
   const tripData = location.state;
 
-  // Flight options
+  // Flight options with detailed information
   const flightOptions = [
     {
       id: "economy",
@@ -38,7 +43,15 @@ const TripResults = () => {
       type: "Economy Class",
       route: "Your City → Bali",
       duration: "14h 30m (1 stop)",
-      cost: Math.floor((tripData?.budget || 2000) * 0.35)
+      cost: Math.floor((tripData?.budget || 2000) * 0.35),
+      departure: "08:30 AM",
+      arrival: "11:00 PM (+1 day)",
+      stopover: "Singapore (2h 30m)",
+      aircraft: "Boeing 787-9",
+      baggage: "23kg checked, 7kg carry-on",
+      meals: "2 meals included",
+      entertainment: "Personal screen with 1000+ movies",
+      bookingLink: "https://skyconnect.com/book/flight123"
     },
     {
       id: "premium",
@@ -46,7 +59,15 @@ const TripResults = () => {
       type: "Premium Economy",
       route: "Your City → Bali",
       duration: "12h 45m (Direct)",
-      cost: Math.floor((tripData?.budget || 2000) * 0.45)
+      cost: Math.floor((tripData?.budget || 2000) * 0.45),
+      departure: "10:15 AM",
+      arrival: "11:00 PM (same day)",
+      stopover: "Direct flight",
+      aircraft: "Airbus A350-900",
+      baggage: "32kg checked, 10kg carry-on",
+      meals: "3 premium meals + snacks",
+      entertainment: "Large personal screen, noise-canceling headphones",
+      bookingLink: "https://premiumairways.com/book/flight456"
     },
     {
       id: "business",
@@ -54,7 +75,15 @@ const TripResults = () => {
       type: "Business Class",
       route: "Your City → Bali",
       duration: "11h 20m (Direct)",
-      cost: Math.floor((tripData?.budget || 2000) * 0.6)
+      cost: Math.floor((tripData?.budget || 2000) * 0.6),
+      departure: "09:45 AM",
+      arrival: "09:05 PM (same day)",
+      stopover: "Direct flight",
+      aircraft: "Boeing 777-300ER",
+      baggage: "40kg checked, 14kg carry-on",
+      meals: "Gourmet dining, premium beverages",
+      entertainment: "Lie-flat seats, premium entertainment system",
+      bookingLink: "https://luxuryairlines.com/book/flight789"
     }
   ];
 
@@ -83,9 +112,11 @@ const TripResults = () => {
     }
   ];
 
-  // State for selected options
+  // State for selected options and dialog
   const [selectedFlight, setSelectedFlight] = useState("economy");
   const [selectedAccommodation, setSelectedAccommodation] = useState("standard");
+  const [flightDialogOpen, setFlightDialogOpen] = useState(false);
+  const [selectedFlightDetails, setSelectedFlightDetails] = useState(null);
 
   // Calculate dynamic costs with safety checks
   const selectedFlightOption = flightOptions.find(f => f.id === selectedFlight) || flightOptions[0];
@@ -142,6 +173,19 @@ const TripResults = () => {
       case "shopping": return <Utensils className="h-4 w-4" />;
       default: return <MapPin className="h-4 w-4" />;
     }
+  };
+
+  const handleFlightDetails = (flight) => {
+    setSelectedFlightDetails(flight);
+    setFlightDialogOpen(true);
+  };
+
+  const handleBookFlight = (bookingLink) => {
+    window.open(bookingLink, '_blank');
+    toast({
+      title: "Redirecting to booking...",
+      description: "Opening airline website in a new tab.",
+    });
   };
 
   return (
@@ -237,10 +281,21 @@ const TripResults = () => {
                               <div className="text-xs text-muted-foreground">{option.type}</div>
                               <div className="text-xs text-muted-foreground">{option.duration}</div>
                             </div>
-                            <div className="text-right">
+                            <div className="flex items-center gap-2">
                               <Badge variant={selectedFlight === option.id ? "default" : "outline"}>
                                 ${option.cost}
                               </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleFlightDetails(option);
+                                }}
+                                className="p-1 h-6 w-6"
+                              >
+                                <Info className="h-3 w-3" />
+                              </Button>
                             </div>
                           </div>
                         </Label>
@@ -377,6 +432,97 @@ const TripResults = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Flight Details Dialog */}
+      <Dialog open={flightDialogOpen} onOpenChange={setFlightDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plane className="h-5 w-5 text-primary" />
+              Flight Details - {selectedFlightDetails?.airline}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedFlightDetails && (
+            <div className="space-y-6">
+              {/* Flight Overview */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Flight Class</div>
+                  <div className="font-semibold">{selectedFlightDetails.type}</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Aircraft</div>
+                  <div className="font-semibold">{selectedFlightDetails.aircraft}</div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Schedule */}
+              <div className="space-y-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Flight Schedule
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="text-sm text-muted-foreground">Departure</div>
+                    <div className="font-semibold">{selectedFlightDetails.departure}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm text-muted-foreground">Arrival</div>
+                    <div className="font-semibold">{selectedFlightDetails.arrival}</div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Duration & Stops</div>
+                  <div className="font-semibold">{selectedFlightDetails.duration}</div>
+                  <div className="text-sm text-muted-foreground">{selectedFlightDetails.stopover}</div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Amenities */}
+              <div className="space-y-4">
+                <h3 className="font-semibold">Included Amenities</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="text-xs">Baggage</Badge>
+                    <span className="text-sm">{selectedFlightDetails.baggage}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="text-xs">Meals</Badge>
+                    <span className="text-sm">{selectedFlightDetails.meals}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="text-xs">Entertainment</Badge>
+                    <span className="text-sm">{selectedFlightDetails.entertainment}</span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Pricing & Booking */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-primary">${selectedFlightDetails.cost}</div>
+                  <div className="text-sm text-muted-foreground">Per person</div>
+                </div>
+                <Button 
+                  variant="travel" 
+                  onClick={() => handleBookFlight(selectedFlightDetails.bookingLink)}
+                  className="flex items-center gap-2"
+                >
+                  Book Flight <ExternalLink className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
