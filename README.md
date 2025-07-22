@@ -1,3 +1,5 @@
+![My Trip Genie Header](src/assets/travel-hero.png)
+
 # My Trip Genie - Budget Wizard
 
 ## Getting Started
