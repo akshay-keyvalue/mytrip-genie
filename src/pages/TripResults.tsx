@@ -1,8 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { 
   Plane, 
   Hotel, 
@@ -16,7 +19,8 @@ import {
   ArrowLeft,
   Coffee,
   Camera,
-  Utensils
+  Utensils,
+  Check
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,28 +30,69 @@ const TripResults = () => {
   const { toast } = useToast();
   const tripData = location.state;
 
-  // Sample generated trip data
-  const generatedTrip = {
-    destination: tripData?.destination === "AI will suggest best destinations" ? "Bali, Indonesia" : (tripData?.destination || "Bali, Indonesia"),
-    totalCost: Math.min(tripData?.budget || 2000, Math.floor((tripData?.budget || 2000) * 0.95)),
-    duration: tripData?.duration || "7-10",
-    travelers: tripData?.travelers || "2",
-    flights: {
-      outbound: "Your City → Bali",
-      return: "Bali → Your City",
-      cost: Math.floor((tripData?.budget || 2000) * 0.4),
-      duration: "14h 30m (1 stop)"
+  // Flight options
+  const flightOptions = [
+    {
+      id: "economy",
+      airline: "SkyConnect Airlines",
+      type: "Economy Class",
+      route: "Your City → Bali",
+      duration: "14h 30m (1 stop)",
+      cost: Math.floor((tripData?.budget || 2000) * 0.35)
     },
-    accommodation: {
+    {
+      id: "premium",
+      airline: "Premium Airways",
+      type: "Premium Economy",
+      route: "Your City → Bali",
+      duration: "12h 45m (Direct)",
+      cost: Math.floor((tripData?.budget || 2000) * 0.45)
+    },
+    {
+      id: "business",
+      airline: "Luxury Airlines",
+      type: "Business Class",
+      route: "Your City → Bali",
+      duration: "11h 20m (Direct)",
+      cost: Math.floor((tripData?.budget || 2000) * 0.6)
+    }
+  ];
+
+  // Accommodation options
+  const accommodationOptions = [
+    {
+      id: "budget",
+      name: "Cozy Beach Hostel",
+      type: "3-star boutique hostel",
+      cost: Math.floor((tripData?.budget || 2000) * 0.25),
+      amenities: ["Pool", "Free WiFi", "Beach Access"]
+    },
+    {
+      id: "standard",
       name: "Tropical Paradise Resort",
       type: "4-star beachfront resort",
       cost: Math.floor((tripData?.budget || 2000) * 0.35),
       amenities: ["Pool", "Spa", "Beach Access", "Free WiFi"]
     },
-    transport: {
-      type: "Private car + scooter rental",
-      cost: Math.floor((tripData?.budget || 2000) * 0.1)
-    },
+    {
+      id: "luxury",
+      name: "Royal Ocean Villa",
+      type: "5-star luxury villa",
+      cost: Math.floor((tripData?.budget || 2000) * 0.5),
+      amenities: ["Private Pool", "Spa", "Butler Service", "Beach Access", "Free WiFi", "Restaurant"]
+    }
+  ];
+
+  // State for selected options
+  const [selectedFlight, setSelectedFlight] = useState("economy");
+  const [selectedAccommodation, setSelectedAccommodation] = useState("standard");
+
+  // Calculate dynamic costs
+  const selectedFlightOption = flightOptions.find(f => f.id === selectedFlight);
+  const selectedAccommodationOption = accommodationOptions.find(a => a.id === selectedAccommodation);
+  
+  const staticCosts = {
+    transport: Math.floor((tripData?.budget || 2000) * 0.1),
     activities: [
       { day: 1, title: "Arrival & Ubud Rice Terraces", cost: 50, type: "culture" },
       { day: 2, title: "Tanah Lot Temple & Sunset", cost: 30, type: "sightseeing" },
@@ -57,6 +102,21 @@ const TripResults = () => {
       { day: 6, title: "Beach Day & Spa Treatment", cost: 70, type: "relaxation" },
       { day: 7, title: "Souvenir Shopping & Departure", cost: 40, type: "shopping" }
     ]
+  };
+
+  const totalActivitiesCost = staticCosts.activities.reduce((sum, act) => sum + act.cost, 0);
+  
+  const totalCost = useMemo(() => {
+    return (selectedFlightOption?.cost || 0) + 
+           (selectedAccommodationOption?.cost || 0) + 
+           staticCosts.transport + 
+           totalActivitiesCost;
+  }, [selectedFlightOption, selectedAccommodationOption, staticCosts.transport, totalActivitiesCost]);
+
+  const generatedTrip = {
+    destination: tripData?.destination === "AI will suggest best destinations" ? "Bali, Indonesia" : (tripData?.destination || "Bali, Indonesia"),
+    duration: tripData?.duration || "7-10",
+    travelers: tripData?.travelers || "2"
   };
 
   const handleShare = () => {
@@ -121,7 +181,7 @@ const TripResults = () => {
                 </CardDescription>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold">${generatedTrip.totalCost.toLocaleString()}</div>
+                <div className="text-3xl font-bold">${totalCost.toLocaleString()}</div>
                 <div className="text-white/90">Total Budget</div>
               </div>
             </div>
@@ -161,19 +221,33 @@ const TripResults = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Plane className="h-5 w-5 text-primary" />
-                  Flights
+                  Flight Options
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <div className="font-semibold">{generatedTrip.flights.outbound}</div>
-                  <div className="text-sm text-muted-foreground">{generatedTrip.flights.duration}</div>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Total Flight Cost</span>
-                  <Badge variant="secondary">${generatedTrip.flights.cost}</Badge>
-                </div>
+                <RadioGroup value={selectedFlight} onValueChange={setSelectedFlight}>
+                  {flightOptions.map((option) => (
+                    <div key={option.id} className="border rounded-lg p-3 hover:bg-muted/50 transition-smooth">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value={option.id} id={option.id} />
+                        <Label htmlFor={option.id} className="flex-1 cursor-pointer">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-semibold text-sm">{option.airline}</div>
+                              <div className="text-xs text-muted-foreground">{option.type}</div>
+                              <div className="text-xs text-muted-foreground">{option.duration}</div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant={selectedFlight === option.id ? "default" : "outline"}>
+                                ${option.cost}
+                              </Badge>
+                            </div>
+                          </div>
+                        </Label>
+                      </div>
+                    </div>
+                  ))}
+                </RadioGroup>
               </CardContent>
             </Card>
 
@@ -182,26 +256,37 @@ const TripResults = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Hotel className="h-5 w-5 text-accent" />
-                  Accommodation
+                  Accommodation Options
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <div className="font-semibold">{generatedTrip.accommodation.name}</div>
-                  <div className="text-sm text-muted-foreground">{generatedTrip.accommodation.type}</div>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {generatedTrip.accommodation.amenities.map((amenity, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {amenity}
-                    </Badge>
+                <RadioGroup value={selectedAccommodation} onValueChange={setSelectedAccommodation}>
+                  {accommodationOptions.map((option) => (
+                    <div key={option.id} className="border rounded-lg p-3 hover:bg-muted/50 transition-smooth">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value={option.id} id={`acc-${option.id}`} />
+                        <Label htmlFor={`acc-${option.id}`} className="flex-1 cursor-pointer">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <div className="font-semibold text-sm">{option.name}</div>
+                              <div className="text-xs text-muted-foreground">{option.type}</div>
+                            </div>
+                            <Badge variant={selectedAccommodation === option.id ? "default" : "outline"}>
+                              ${option.cost}
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {option.amenities.map((amenity, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {amenity}
+                              </Badge>
+                            ))}
+                          </div>
+                        </Label>
+                      </div>
+                    </div>
                   ))}
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Total Stay Cost</span>
-                  <Badge variant="secondary">${generatedTrip.accommodation.cost}</Badge>
-                </div>
+                </RadioGroup>
               </CardContent>
             </Card>
 
@@ -215,10 +300,10 @@ const TripResults = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="font-semibold">{generatedTrip.transport.type}</div>
+                  <div className="font-semibold">Private car + scooter rental</div>
                   <div className="flex items-center justify-between">
                     <span>Total Transport Cost</span>
-                    <Badge variant="secondary">${generatedTrip.transport.cost}</Badge>
+                    <Badge variant="secondary">${staticCosts.transport}</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -238,7 +323,7 @@ const TripResults = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {generatedTrip.activities.map((activity, index) => (
+                {staticCosts.activities.map((activity, index) => (
                   <div key={index} className="border rounded-lg p-4 hover:shadow-soft transition-smooth">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
@@ -273,19 +358,19 @@ const TripResults = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <div className="text-2xl font-bold text-primary">${generatedTrip.flights.cost}</div>
+                <div className="text-2xl font-bold text-primary">${selectedFlightOption?.cost || 0}</div>
                 <div className="text-sm text-muted-foreground">Flights</div>
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <div className="text-2xl font-bold text-accent">${generatedTrip.accommodation.cost}</div>
+                <div className="text-2xl font-bold text-accent">${selectedAccommodationOption?.cost || 0}</div>
                 <div className="text-sm text-muted-foreground">Accommodation</div>
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <div className="text-2xl font-bold text-secondary">${generatedTrip.activities.reduce((sum, act) => sum + act.cost, 0)}</div>
+                <div className="text-2xl font-bold text-secondary">${totalActivitiesCost}</div>
                 <div className="text-sm text-muted-foreground">Activities</div>
               </div>
               <div className="text-center p-4 bg-gradient-sky text-white rounded-lg">
-                <div className="text-2xl font-bold">${generatedTrip.totalCost}</div>
+                <div className="text-2xl font-bold">${totalCost}</div>
                 <div className="text-sm text-white/90">Total Cost</div>
               </div>
             </div>
