@@ -87,9 +87,9 @@ const TripResults = () => {
   const [selectedFlight, setSelectedFlight] = useState("economy");
   const [selectedAccommodation, setSelectedAccommodation] = useState("standard");
 
-  // Calculate dynamic costs
-  const selectedFlightOption = flightOptions.find(f => f.id === selectedFlight);
-  const selectedAccommodationOption = accommodationOptions.find(a => a.id === selectedAccommodation);
+  // Calculate dynamic costs with safety checks
+  const selectedFlightOption = flightOptions.find(f => f.id === selectedFlight) || flightOptions[0];
+  const selectedAccommodationOption = accommodationOptions.find(a => a.id === selectedAccommodation) || accommodationOptions[1];
   
   const staticCosts = {
     transport: Math.floor((tripData?.budget || 2000) * 0.1),
