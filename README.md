@@ -1,56 +1,30 @@
-# Welcome to your Lovable project
+# My Trip Genie - Budget Wizard
 
-## Project info
+## Getting Started
 
-**URL**: https://lovable.dev/projects/f555161e-1207-4b7c-9477-85faaf5e5b00
+To get this project up and running locally, follow these steps:
 
-## How can I edit this code?
+### Prerequisites
 
-There are several ways of editing your application.
+- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/f555161e-1207-4b7c-9477-85faaf5e5b00) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Setup Instructions
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd mytrip-budget-wizard
 
-# Step 3: Install the necessary dependencies.
+# Step 3: Install the necessary dependencies
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server with auto-reloading and an instant preview
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Technologies Used
 
 This project is built with:
 
@@ -60,14 +34,29 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/f555161e-1207-4b7c-9477-85faaf5e5b00) and click on Share -> Publish.
+## About the App - My Trip Genie
 
-## Can I connect a custom domain to my Lovable project?
+My Trip Genie whips up its magic to transform your travel dreams into reality! 🧞‍♂️✨
 
-Yes, you can!
+**Smart Trip Planning Made Simple**
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Gone are the days of endless research and overwhelming choices. My Trip Genie is an intelligent trip planning application that creates personalized, day-by-day itineraries tailored to your specific needs and budget constraints.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+**How It Works:**
+- 💰 **Budget-Conscious Planning**: Input your desired budget and group size
+- 🗺️ **Location Intelligence**: Tell us your dream destination  
+- 🎯 **Comprehensive Itineraries**: Get detailed daily plans including:
+  - 🏨 Accommodation recommendations
+  - 🚗 Transportation options
+  - 🎭 Activities and attractions
+  - 🍽️ Dining suggestions
+
+**Perfect For:**
+- Solo adventurers to large group travels
+- Weekend getaways to extended vacations
+- Budget backpackers to luxury travelers
+- First-time visitors to experienced explorers
+
+**The Magic Behind the Scenes:**
+My Trip Genie leverages intelligent algorithms to optimize your travel experience, ensuring every dollar is well-spent and every moment is memorable. No more decision fatigue – just pack your bags and let the genie handle the rest!
